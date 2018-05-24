@@ -10,8 +10,8 @@
     <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>TypeScriptHTMLApp1</RootNamespace>
-    <AssemblyName>TypeScriptHTMLApp1</AssemblyName>
+    <RootNamespace>LotteryMachine</RootNamespace>
+    <AssemblyName>LotteryMachine</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
@@ -79,6 +79,7 @@
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="babylonjs\babylon.d.ts" />
     <TypeScriptCompile Include="scripts\GameMain.ts" />
+    <TypeScriptCompile Include="scripts\Wheel.ts" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
