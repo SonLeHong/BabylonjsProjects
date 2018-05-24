@@ -2,7 +2,7 @@
     model: BABYLON.Mesh;
     rotateSpeed: number = 5;
     currentSpeed: number = 1;
-    deltaSpeed: 0.1;
+    deltaSpeed: number = 0.1;
     scene: BABYLON.Scene;
 
     constructor(public diameter: number, public thickness: number, scene: BABYLON.Scene) {
@@ -28,7 +28,7 @@
         this.scene = scene;
     }
 
-    public rotate()  {
+    public rotate() {
         // let _self = this;
         this.currentSpeed = this.rotateSpeed;
         //this.scene.registerBeforeRender(this.update);
@@ -40,7 +40,8 @@
             this.scene.unregisterBeforeRender(() => this.update());
             return;
         }
-        var dt = this.scene.getEngine().getDeltaTime();
+        var dt = this.scene.getEngine().getDeltaTime() / 1000; //convert ms -> s
+        console.log(dt);
         this.model.rotate(BABYLON.Axis.Z, Math.PI / 64 * this.currentSpeed * dt, BABYLON.Space.WORLD);
         this.currentSpeed -= this.deltaSpeed;
     }

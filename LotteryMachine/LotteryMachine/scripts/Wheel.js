@@ -1,9 +1,10 @@
-var Wheel = /** @class */ (function () {
+var Wheel = (function () {
     function Wheel(diameter, thickness, scene) {
         this.diameter = diameter;
         this.thickness = thickness;
         this.rotateSpeed = 5;
         this.currentSpeed = 1;
+        this.deltaSpeed = 0.1;
         //Wheel Material 
         var wheelMaterial = new BABYLON.StandardMaterial("wheel_mat", scene);
         var wheelTexture = new BABYLON.Texture("http://i.imgur.com/ZUWbT6L.png", scene);
@@ -34,7 +35,8 @@ var Wheel = /** @class */ (function () {
             this.scene.unregisterBeforeRender(function () { return _this.update(); });
             return;
         }
-        var dt = this.scene.getEngine().getDeltaTime();
+        var dt = this.scene.getEngine().getDeltaTime() / 1000; //convert ms -> s
+        console.log(dt);
         this.model.rotate(BABYLON.Axis.Z, Math.PI / 64 * this.currentSpeed * dt, BABYLON.Space.WORLD);
         this.currentSpeed -= this.deltaSpeed;
     };
