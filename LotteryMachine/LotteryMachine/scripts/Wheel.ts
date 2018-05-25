@@ -1,48 +1,34 @@
 ﻿class Wheel {
     model: BABYLON.Mesh;
-    rotateSpeed: number = 5;
-    currentSpeed: number = 1;
-    deltaSpeed: number = 0.1;
+    rotateSpeed: number = 96;
+    currentSpeed: number = 320;
+    deltaSpeed: number = 1;
     scene: BABYLON.Scene;
-
-    constructor(public diameter: number, public thickness: number, scene: BABYLON.Scene) {
+    updateMethod: BABYLON.Nullable<() => void>;
+    subdivisions: number = 8;
+    constructor(public gameMain: GameMain) {
         //Wheel Material 
-        var wheelMaterial = new BABYLON.StandardMaterial("wheel_mat", scene);
-        var wheelTexture = new BABYLON.Texture("http://i.imgur.com/ZUWbT6L.png", scene);
-        wheelMaterial.diffuseTexture = wheelTexture;
+        this.scene = gameMain.scene;
+        this.model = gameMain.createMesh(gameMain.assets['wheel'], 'wheel');
+        this.model.scaling = new BABYLON.Vector3(5, 5, 5);
 
-        //Set color for wheel tread as black
-        var faceColors = [];
-        faceColors[1] = new BABYLON.Color3(0, 0, 0);
-
-        //set texture for flat face of wheel 
-        var faceUV = [];
-        faceUV[0] = new BABYLON.Vector4(0, 0, 1, 1);
-        faceUV[2] = new BABYLON.Vector4(0, 0, 1, 1);
-
-        this.model = BABYLON.MeshBuilder.CreateCylinder("wheelFI", { diameter: 3, height: 1, tessellation: 24, faceColors: faceColors, faceUV: faceUV }, scene);
-        this.model.material = wheelMaterial;
-
-        //rotate wheel so tread in xz plane  
-        this.model.rotate(BABYLON.Axis.X, Math.PI / 2, BABYLON.Space.WORLD);
-        this.scene = scene;
+        this.updateMethod = (<() => void>this.update.bind(this));
     }
 
-    public rotate() {
-        // let _self = this;
-        this.currentSpeed = this.rotateSpeed;
-        //this.scene.registerBeforeRender(this.update);
-        this.scene.registerBeforeRender(() => this.update());
+    public rotate(): void {
+        let _self = this;
+        let rotateSteps = Math.floor(Math.random() * 10) + 10;
+        this.currentSpeed = rotateSteps * this.subdivisions;
+        this.scene.registerBeforeRender(this.updateMethod);
     }
 
-    public update() {
-        if (this.currentSpeed <= 0) {
-            this.scene.unregisterBeforeRender(() => this.update());
+    public update(): void {
+        if (this.currentSpeed <= 0.0) {
+            this.scene.unregisterBeforeRender(this.updateMethod);
             return;
         }
         var dt = this.scene.getEngine().getDeltaTime() / 1000; //convert ms -> s
-        console.log(dt);
-        this.model.rotate(BABYLON.Axis.Z, Math.PI / 64 * this.currentSpeed * dt, BABYLON.Space.WORLD);
+        this.model.rotate(BABYLON.Axis.X, - Math.PI / 16, BABYLON.Space.WORLD);
         this.currentSpeed -= this.deltaSpeed;
     }
 }

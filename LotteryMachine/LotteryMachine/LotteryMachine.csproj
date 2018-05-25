@@ -56,8 +56,11 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="assets\wheel\wheel.png" />
     <Content Include="babylonjs\package.json" />
     <Content Include="babylonjs\readme.md" />
+    <Content Include="assets\wheel\wheel.babylon" />
+    <Content Include="assets\wheel\wheel.babylon.manifest" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -73,7 +76,9 @@
     <Content Include="babylonjs\es6.js" />
     <Content Include="babylonjs\Oimo.js" />
     <Content Include="index.html" />
-    <Content Include="Web.config" />
+    <Content Include="Web.config">
+      <SubType>Designer</SubType>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
@@ -85,6 +90,7 @@
     <Service Include="{4A0DDDB5-7A95-4FBF-97CC-616D07737A77}" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="images\" />
     <Folder Include="Properties\" />
   </ItemGroup>
   <PropertyGroup>

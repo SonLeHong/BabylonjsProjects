@@ -1,43 +1,29 @@
-var Wheel = (function () {
-    function Wheel(diameter, thickness, scene) {
-        this.diameter = diameter;
-        this.thickness = thickness;
-        this.rotateSpeed = 5;
-        this.currentSpeed = 1;
-        this.deltaSpeed = 0.1;
+var Wheel = /** @class */ (function () {
+    function Wheel(gameMain) {
+        this.gameMain = gameMain;
+        this.rotateSpeed = 96;
+        this.currentSpeed = 320;
+        this.deltaSpeed = 1;
+        this.subdivisions = 8;
         //Wheel Material 
-        var wheelMaterial = new BABYLON.StandardMaterial("wheel_mat", scene);
-        var wheelTexture = new BABYLON.Texture("http://i.imgur.com/ZUWbT6L.png", scene);
-        wheelMaterial.diffuseTexture = wheelTexture;
-        //Set color for wheel tread as black
-        var faceColors = [];
-        faceColors[1] = new BABYLON.Color3(0, 0, 0);
-        //set texture for flat face of wheel 
-        var faceUV = [];
-        faceUV[0] = new BABYLON.Vector4(0, 0, 1, 1);
-        faceUV[2] = new BABYLON.Vector4(0, 0, 1, 1);
-        this.model = BABYLON.MeshBuilder.CreateCylinder("wheelFI", { diameter: 3, height: 1, tessellation: 24, faceColors: faceColors, faceUV: faceUV }, scene);
-        this.model.material = wheelMaterial;
-        //rotate wheel so tread in xz plane  
-        this.model.rotate(BABYLON.Axis.X, Math.PI / 2, BABYLON.Space.WORLD);
-        this.scene = scene;
+        this.scene = gameMain.scene;
+        this.model = gameMain.createMesh(gameMain.assets['wheel'], 'wheel');
+        this.model.scaling = new BABYLON.Vector3(5, 5, 5);
+        this.updateMethod = this.update.bind(this);
     }
     Wheel.prototype.rotate = function () {
-        var _this = this;
-        // let _self = this;
-        this.currentSpeed = this.rotateSpeed;
-        //this.scene.registerBeforeRender(this.update);
-        this.scene.registerBeforeRender(function () { return _this.update(); });
+        var _self = this;
+        var rotateSteps = Math.floor(Math.random() * 10) + 10;
+        this.currentSpeed = rotateSteps * this.subdivisions;
+        this.scene.registerBeforeRender(this.updateMethod);
     };
     Wheel.prototype.update = function () {
-        var _this = this;
-        if (this.currentSpeed <= 0) {
-            this.scene.unregisterBeforeRender(function () { return _this.update(); });
+        if (this.currentSpeed <= 0.0) {
+            this.scene.unregisterBeforeRender(this.updateMethod);
             return;
         }
         var dt = this.scene.getEngine().getDeltaTime() / 1000; //convert ms -> s
-        console.log(dt);
-        this.model.rotate(BABYLON.Axis.Z, Math.PI / 64 * this.currentSpeed * dt, BABYLON.Space.WORLD);
+        this.model.rotate(BABYLON.Axis.X, -Math.PI / 16, BABYLON.Space.WORLD);
         this.currentSpeed -= this.deltaSpeed;
     };
     return Wheel;
