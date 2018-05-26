@@ -1,0 +1,28 @@
+var E_WHELL_STATE;
+(function (E_WHELL_STATE) {
+    E_WHELL_STATE[E_WHELL_STATE["IDLE"] = 0] = "IDLE";
+    E_WHELL_STATE[E_WHELL_STATE["ROTATE"] = 1] = "ROTATE";
+    E_WHELL_STATE[E_WHELL_STATE["ROTATE_DONE"] = 2] = "ROTATE_DONE";
+})(E_WHELL_STATE || (E_WHELL_STATE = {}));
+;
+var WheelNumber = 3;
+var rules = [
+    [0, 0, 0],
+    [1, 1, 1],
+    [2, 2, 2],
+    [0, 1, 2],
+    [2, 1, 0],
+];
+var E_WHEEL_VALUE;
+(function (E_WHEEL_VALUE) {
+    E_WHEEL_VALUE[E_WHEEL_VALUE["ORANGE"] = 0] = "ORANGE";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["BLUEBERRY"] = 1] = "BLUEBERRY";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["BAR"] = 2] = "BAR";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["BANANA"] = 3] = "BANANA";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["WATERMELON"] = 4] = "WATERMELON";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["GRAPE"] = 5] = "GRAPE";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["MANGO"] = 6] = "MANGO";
+    E_WHEEL_VALUE[E_WHEEL_VALUE["SEVEN_NUMBER"] = 7] = "SEVEN_NUMBER";
+})(E_WHEEL_VALUE || (E_WHEEL_VALUE = {}));
+;
+//# sourceMappingURL=Definitions.js.map
