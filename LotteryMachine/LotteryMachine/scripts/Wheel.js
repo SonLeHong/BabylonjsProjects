@@ -3,7 +3,7 @@ var Wheel = (function () {
         this.id = id;
         this.gameMain = gameMain;
         this.currentRotateSteps = 0;
-        this.subdivisions = 8;
+        this.subdivisions = E_WHEEL_VALUE.MAX;
         this.stepToRotateThroungItem = 4; //we need to rotate x step (x update loops) to pass 1 item
         this.wheelValue = 0;
         //Wheel Material 
@@ -16,9 +16,10 @@ var Wheel = (function () {
         this.rotateDoneCallback = gameMain.wheelRotateDoneCallback.bind(gameMain);
     }
     Wheel.prototype.rotate = function (rotateSteps) {
-        var _self = this;
+        this.gameMain.wheelStates[this.id] = E_WHEEL_STATE.ROTATE;
+        console.log("rotateStep[" + this.id + "] = " + rotateSteps);
         this.currentRotateSteps = rotateSteps * this.stepToRotateThroungItem;
-        this.wheelValue = rotateSteps % this.subdivisions;
+        this.wheelValue = (this.wheelValue + rotateSteps) % this.subdivisions;
         this.scene.registerBeforeRender(this.updateMethod);
     };
     Wheel.prototype.update = function () {
@@ -27,7 +28,6 @@ var Wheel = (function () {
             this.rotateDoneCallback(this);
             return;
         }
-        var dt = this.scene.getEngine().getDeltaTime() / 1000; //convert ms -> s
         this.model.rotate(BABYLON.Axis.X, -(2 * Math.PI) / (this.subdivisions * this.stepToRotateThroungItem), BABYLON.Space.WORLD);
         this.currentRotateSteps -= 1;
     };

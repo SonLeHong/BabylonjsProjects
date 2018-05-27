@@ -1,7 +1,8 @@
-﻿enum E_WHELL_STATE {
+﻿enum E_WHEEL_STATE {
     IDLE,
     ROTATE,
-    ROTATE_DONE
+    STOP,
+    CALLBACK_DONE
 };
 
 const WheelNumber: number = 3;
@@ -23,5 +24,11 @@ enum E_WHEEL_VALUE {
     WATERMELON,
     GRAPE,
     MANGO,
-    SEVEN_NUMBER
+    SEVEN_NUMBER,
+    MAX
 };
+
+enum E_WHEEL_CALLBACK_STATE {
+    NOT_DONE = 0,
+    DONE
+}

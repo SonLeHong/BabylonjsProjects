@@ -57,10 +57,12 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="assets\wheel\wheel.png" />
-    <Content Include="babylonjs\package.json" />
-    <Content Include="babylonjs\readme.md" />
     <Content Include="assets\wheel\wheel.babylon" />
     <Content Include="assets\wheel\wheel.babylon.manifest" />
+    <Content Include="node_modules\babylonjs-gui\package.json" />
+    <Content Include="node_modules\babylonjs-gui\readme.md" />
+    <Content Include="node_modules\babylonjs\package.json" />
+    <Content Include="node_modules\babylonjs\readme.md" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>
@@ -70,19 +72,22 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.css" />
-    <Content Include="babylonjs\babylon.js" />
-    <Content Include="babylonjs\babylon.max.js" />
-    <Content Include="babylonjs\babylon.worker.js" />
-    <Content Include="babylonjs\es6.js" />
-    <Content Include="babylonjs\Oimo.js" />
     <Content Include="index.html" />
+    <Content Include="node_modules\babylonjs-gui\babylon.gui.js" />
+    <Content Include="node_modules\babylonjs-gui\babylon.gui.min.js" />
+    <Content Include="node_modules\babylonjs\babylon.js" />
+    <Content Include="node_modules\babylonjs\babylon.max.js" />
+    <Content Include="node_modules\babylonjs\babylon.worker.js" />
+    <Content Include="node_modules\babylonjs\es6.js" />
+    <Content Include="node_modules\babylonjs\Oimo.js" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
-    <TypeScriptCompile Include="babylonjs\babylon.d.ts" />
+    <TypeScriptCompile Include="node_modules\babylonjs-gui\babylon.gui.d.ts" />
+    <TypeScriptCompile Include="node_modules\babylonjs\babylon.d.ts" />
     <TypeScriptCompile Include="scripts\Definitions.ts" />
     <TypeScriptCompile Include="scripts\GameMain.ts" />
     <TypeScriptCompile Include="scripts\Wheel.ts" />
