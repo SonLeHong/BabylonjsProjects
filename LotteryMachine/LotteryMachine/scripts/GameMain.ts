@@ -7,6 +7,9 @@
     wheels: Wheel[] = new Array(WheelNumber);
     wheelValues: number[][] = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]];
     wheelStates: E_WHEEL_STATE[] = [E_WHEEL_STATE.IDLE, E_WHEEL_STATE.IDLE, E_WHEEL_STATE.IDLE];
+    spinRemaining: number = 50;
+    spinWining: number = 0;
+    textBlock: BABYLON.GUI.TextBlock;
     constructor(canvasName: string) {
         this.canvasName = canvasName;
     }
@@ -69,8 +72,14 @@
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickDownTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 0.5, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
-            spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (event) => {
-                this.spin();
+            spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (event) => {             
+                if (this.spinRemaining > 0) {
+                    this.spin();
+                    this.spinRemaining -= 1;                   
+                }
+                else {
+
+                }
             }));
         }
 
@@ -80,20 +89,33 @@
         rect1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         rect1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         rect1.adaptWidthToChildren = true;
-        rect1.height = "40px";
-        rect1.cornerRadius = 20;
+        rect1.height = "80px";
+        //rect1.cornerRadius = 20;
         rect1.color = "Orange";
         rect1.thickness = 0;
         //rect1.background = "green";
         advancedTexture.addControl(rect1);
 
-        let text1 = new BABYLON.GUI.TextBlock();
-        text1.text = "Hello world";
-        text1.color = "white";
-        text1.width = "150px";
-        text1.fontSize = 24;
-        rect1.addControl(text1);    
+        this.textBlock = new BABYLON.GUI.TextBlock();
+        this.textBlock.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
+        this.textBlock.text += "\n";
+        this.textBlock.text += "Spin Wining: " + this.spinWining;
+        this.textBlock.color = "white";
+        this.textBlock.width = "300px";
+        this.textBlock.fontSize = 24;
+        rect1.addControl(this.textBlock);
 
+        this.scene.registerBeforeRender(() => {
+            this.updateGUI();
+        });
+
+    }
+    updateGUI(): void{
+        this.textBlock.text = "";
+        this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
+        this.textBlock.text += "\n";
+        this.textBlock.text += "Spin Wining: " + this.spinWining;
     }
 
     spin(): void {
@@ -131,8 +153,7 @@
                 (this.wheelValues[0][0] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][2])
             ) {
                 //win here
-                let a = 0;
-                a = 1;
+                this.spinWining += 1;
             }
         }
     }

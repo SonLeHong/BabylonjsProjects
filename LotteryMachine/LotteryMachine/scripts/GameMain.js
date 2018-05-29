@@ -4,6 +4,8 @@ var GameMain = /** @class */ (function () {
         this.wheels = new Array(WheelNumber);
         this.wheelValues = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]];
         this.wheelStates = [E_WHEEL_STATE.IDLE, E_WHEEL_STATE.IDLE, E_WHEEL_STATE.IDLE];
+        this.spinRemaining = 50;
+        this.spinWining = 0;
         this.canvasName = canvasName;
     }
     GameMain.prototype.initMesh = function (task) {
@@ -62,7 +64,12 @@ var GameMain = /** @class */ (function () {
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, function (event) {
-                _this.spin();
+                if (_this.spinRemaining > 0) {
+                    _this.spin();
+                    _this.spinRemaining -= 1;
+                }
+                else {
+                }
             }));
         }
         //init GUI
@@ -71,18 +78,30 @@ var GameMain = /** @class */ (function () {
         rect1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         rect1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         rect1.adaptWidthToChildren = true;
-        rect1.height = "40px";
-        rect1.cornerRadius = 20;
+        rect1.height = "80px";
+        //rect1.cornerRadius = 20;
         rect1.color = "Orange";
         rect1.thickness = 0;
         //rect1.background = "green";
         advancedTexture.addControl(rect1);
-        var text1 = new BABYLON.GUI.TextBlock();
-        text1.text = "Hello world";
-        text1.color = "white";
-        text1.width = "150px";
-        text1.fontSize = 24;
-        rect1.addControl(text1);
+        this.textBlock = new BABYLON.GUI.TextBlock();
+        this.textBlock.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
+        this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
+        this.textBlock.text += "\n";
+        this.textBlock.text += "Spin Wining: " + this.spinWining;
+        this.textBlock.color = "white";
+        this.textBlock.width = "300px";
+        this.textBlock.fontSize = 24;
+        rect1.addControl(this.textBlock);
+        this.scene.registerBeforeRender(function () {
+            _this.updateGUI();
+        });
+    };
+    GameMain.prototype.updateGUI = function () {
+        this.textBlock.text = "";
+        this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
+        this.textBlock.text += "\n";
+        this.textBlock.text += "Spin Wining: " + this.spinWining;
     };
     GameMain.prototype.spin = function () {
         var _this = this;
@@ -140,9 +159,6 @@ var GameMain = /** @class */ (function () {
         loadWheelTask.onSuccess = function (task) {
             _this.initMesh(task);
         };
-        //loadWheelTask.onError = function (task, message, exception) {
-        //    _self.initMesh(task);
-        //}
         loader.load();
         loader.onFinish = function (tasks) {
             _this.initGame();
