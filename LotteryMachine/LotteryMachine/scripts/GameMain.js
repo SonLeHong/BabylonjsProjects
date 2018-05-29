@@ -34,6 +34,8 @@ var GameMain = /** @class */ (function () {
         //end skybox
         var ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 2, this.scene);
         ground.position.y = -6;
+        ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.4 }, this.scene);
+        var box = new BoxBonus(100, this.scene);
         //init wheels
         for (var i = 0; i < WheelNumber; i++) {
             this.wheels[i] = new Wheel(i, this);
@@ -41,14 +43,14 @@ var GameMain = /** @class */ (function () {
         }
         //init lines
         BABYLON.MeshBuilder.CreateCylinder;
-        var cl = BABYLON.MeshBuilder.CreateCylinder("cl", { height: 10, diameter: 12, arc: 0.6, enclose: true, subdivisions: 3, hasRings: true }, this.scene);
+        var cl = BABYLON.MeshBuilder.CreateCylinder("cl", { height: 10, diameter: 12, arc: 0.7, enclose: true, subdivisions: 3, hasRings: true }, this.scene);
         cl.rotate(BABYLON.Axis.Z, Math.PI / 2, BABYLON.Space.WORLD);
         cl.rotate(BABYLON.Axis.X, -Math.PI * 3 / 4, BABYLON.Space.WORLD);
         cl.position.x = 3;
         var mat = new BABYLON.StandardMaterial("cl", this.scene);
-        mat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+        mat.diffuseColor = new BABYLON.Color3(0.6, 0.6, 0.6);
         mat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
-        mat.emissiveColor = BABYLON.Color3.Green();
+        mat.emissiveColor = BABYLON.Color3.Blue();
         cl.material = mat;
         //cl.position.z = -10;
         //spinButton
@@ -100,7 +102,7 @@ var GameMain = /** @class */ (function () {
         this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
         this.textBlock.text += "\n";
         this.textBlock.text += "Spin Wining: " + this.spinWining;
-        this.textBlock.color = "white";
+        this.textBlock.color = "blue";
         this.textBlock.width = "300px";
         this.textBlock.fontSize = 24;
         rect1.addControl(this.textBlock);
@@ -151,7 +153,8 @@ var GameMain = /** @class */ (function () {
         this.canvas = document.getElementById(this.canvasName);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.scene = new BABYLON.Scene(this.engine);
-        var camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(-5, 15, -35), this.scene);
+        this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0));
+        var camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(-5, 5, -35), this.scene);
         camera.setTarget(new BABYLON.Vector3(3, 3, 0));
         camera.attachControl(this.engine.getRenderingCanvas());
         // Hemispheric light to light the scene
@@ -164,6 +167,14 @@ var GameMain = /** @class */ (function () {
         var loadWheelTask = loader.addMeshTask("wheel", "", "./assets/wheel/", "wheel.babylon");
         loadWheelTask.onSuccess = function (task) {
             _this.initMesh(task);
+        };
+        var loadBackgroundMusicTask = loader.addBinaryFileTask("load BackgroundMusic task", "sounds/violons18.wav");
+        loadBackgroundMusicTask.onSuccess = function (task) {
+            _this.backgroundMusic = new BABYLON.Sound("backgroundMusic", task.data, _this.scene, null, { loop: true });
+        };
+        var loadspinSoundTask = loader.addBinaryFileTask("load SpinSound task", "sounds/violons18.wav");
+        loadspinSoundTask.onSuccess = function (task) {
+            _this.spinSound = new BABYLON.Sound("spinSound", task.data, _this.scene, null, { loop: false });
         };
         loader.load();
         loader.onFinish = function (tasks) {

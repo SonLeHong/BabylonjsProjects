@@ -1,4 +1,4 @@
 ﻿window.onload = () => {
-    var gameMain = new GameMain("canvas");
+    let gameMain = new GameMain("canvas");
     gameMain.run();
 };

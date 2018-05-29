@@ -7,17 +7,10 @@
 
 const WheelNumber: number = 3;
 
-var rules: number[][] =
-    [
-        [0, 0, 0],
-        [1, 1, 1],
-        [2, 2, 2],
-        [0, 1, 2],
-        [2, 1, 0],
-    ];
-
 enum E_WHEEL_VALUE {
-    ORANGE = 0,
+    APPLE = 0,
+    MANGOSTEEN,
+    ORANGE,
     BLUEBERRY,
     BAR,
     BANANA,
@@ -28,7 +21,5 @@ enum E_WHEEL_VALUE {
     MAX
 };
 
-enum E_WHEEL_CALLBACK_STATE {
-    NOT_DONE = 0,
-    DONE
-}
+const WHEEL_VALUE_FREE_SPIN: E_WHEEL_VALUE = E_WHEEL_VALUE.SEVEN_NUMBER;
+const WHEEL_VALUE_BONUS: E_WHEEL_VALUE = E_WHEEL_VALUE.BAR;
