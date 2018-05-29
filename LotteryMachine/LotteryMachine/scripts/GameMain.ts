@@ -20,7 +20,7 @@
 
         let meshes = obj.meshes;
         for (let i = 0; i < meshes.length; i++) {
-            var newmesh = meshes[i].createInstance(meshes[i].name);
+            let newmesh = meshes[i].createInstance(meshes[i].name);
             newmesh.isPickable = false;
             newmesh.parent = parent;
         }
@@ -29,31 +29,31 @@
     }
 
     initGame(): void {
-        var ground = BABYLON.Mesh.CreateGround("ground1", 50, 50, 2, this.scene);
+        let ground = BABYLON.Mesh.CreateGround("ground1", 50, 50, 2, this.scene);
         ground.position.y = -6;
         //init wheels
-        for (var i = 0; i < WheelNumber; i++) {
+        for (let i = 0; i < WheelNumber; i++) {
             this.wheels[i] = new Wheel(i, this);
             this.wheels[i].model.position.x = 3 * i;
         }
         //init lines
         BABYLON.MeshBuilder.CreateCylinder
-        var cl = BABYLON.MeshBuilder.CreateCylinder("cl", { height: 10, diameter: 12, arc: 0.6, enclose: true, subdivisions: 3, hasRings: true }, this.scene);
+        let cl = BABYLON.MeshBuilder.CreateCylinder("cl", { height: 10, diameter: 12, arc: 0.6, enclose: true, subdivisions: 3, hasRings: true }, this.scene);
         cl.rotate(BABYLON.Axis.Z, Math.PI / 2, BABYLON.Space.WORLD);
         cl.rotate(BABYLON.Axis.X, - Math.PI * 3 / 4, BABYLON.Space.WORLD);
         cl.position.x = 3;
-        var mat = new BABYLON.StandardMaterial("cl", this.scene);
+        let mat = new BABYLON.StandardMaterial("cl", this.scene);
         mat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
         mat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
         mat.emissiveColor = BABYLON.Color3.Green();
         cl.material = mat;
         //cl.position.z = -10;
         //spinButton
-        var spinButton = BABYLON.MeshBuilder.CreateBox("spinButton", { size: 2, width: 4, height: 2 }, this.scene);
+        let spinButton = BABYLON.MeshBuilder.CreateBox("spinButton", { size: 2, width: 4, height: 2 }, this.scene);
         spinButton.position = new BABYLON.Vector3(0, -5, -6);
-        var redMat = new BABYLON.StandardMaterial("ground", this.scene);
-        var dynamicTexture = new BABYLON.DynamicTexture("dynamic texture", { width: 64, height: 32 }, this.scene, false);   
-        var font = "bold 14px monospace";
+        let redMat = new BABYLON.StandardMaterial("ground", this.scene);
+        let dynamicTexture = new BABYLON.DynamicTexture("dynamic texture", { width: 64, height: 32 }, this.scene, false);   
+        let font = "bold 14px monospace";
         
         redMat.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
         redMat.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
@@ -62,7 +62,6 @@
         spinButton.material = redMat;
         dynamicTexture.drawText("Spin", 20, 16, font, "green", "white", true, true);
         spinButton.setPivotPoint(new BABYLON.Vector3(0, -1, 0));
-        let _self = this;
         if (spinButton.actionManager == null) {
             spinButton.actionManager = new BABYLON.ActionManager(this.scene);
             spinButton.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton.material, "emissiveColor", BABYLON.Color3.Red()));
@@ -70,14 +69,14 @@
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickDownTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 0.5, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
-            spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, function (event) {
-                _self.spin();
+            spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (event) => {
+                this.spin();
             }));
         }
 
         //init GUI
-        var advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
-        var rect1 = new BABYLON.GUI.Rectangle();
+        let advancedTexture = BABYLON.GUI.AdvancedDynamicTexture.CreateFullscreenUI("UI");
+        let rect1 = new BABYLON.GUI.Rectangle();
         rect1.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_LEFT;
         rect1.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
         rect1.adaptWidthToChildren = true;
@@ -88,7 +87,7 @@
         //rect1.background = "green";
         advancedTexture.addControl(rect1);
 
-        var text1 = new BABYLON.GUI.TextBlock();
+        let text1 = new BABYLON.GUI.TextBlock();
         text1.text = "Hello world";
         text1.color = "white";
         text1.width = "150px";
@@ -99,7 +98,7 @@
 
     spin(): void {
         let i = 0;
-        var rotateSteps: number[] = new Array(WheelNumber);
+        let rotateSteps: number[] = new Array(WheelNumber);
         for (i = 0; i < WheelNumber; i++) {
             if (i == 0) {
                 rotateSteps[i] = Math.floor(Math.random() * 20) + 10;
@@ -109,7 +108,6 @@
             }
         }
         for (i = 0; i < WheelNumber; i++) {
-            //this.wheels[i].rotate(1);
             setTimeout((i, rotateSteps) => this.wheels[i].rotate(rotateSteps[i]), 500 * i, i, rotateSteps);
         }
     }
@@ -118,22 +116,22 @@
         let i = 0;
         console.log(wheel.id + ": " + wheel.wheelValue);
         for (i = 0; i < 3; i++) {
-            wheel.gameMain.wheelValues[wheel.id][i] = (wheel.wheelValue + i) % E_WHEEL_VALUE.MAX;
+            this.wheelValues[wheel.id][i] = (wheel.wheelValue + i) % E_WHEEL_VALUE.MAX;
         }
-        wheel.gameMain.wheelStates[wheel.id] = E_WHEEL_STATE.CALLBACK_DONE;
+        this.wheelStates[wheel.id] = E_WHEEL_STATE.CALLBACK_DONE;
 
-        if (wheel.gameMain.wheelStates[0] == E_WHEEL_STATE.CALLBACK_DONE &&
-            wheel.gameMain.wheelStates[1] == E_WHEEL_STATE.CALLBACK_DONE &&
-            wheel.gameMain.wheelStates[2] == E_WHEEL_STATE.CALLBACK_DONE
+        if (this.wheelStates[0] == E_WHEEL_STATE.CALLBACK_DONE &&
+            this.wheelStates[1] == E_WHEEL_STATE.CALLBACK_DONE &&
+            this.wheelStates[2] == E_WHEEL_STATE.CALLBACK_DONE
         ) {
-            if ((wheel.gameMain.wheelValues[0][0] == wheel.gameMain.wheelValues[1][0] && wheel.gameMain.wheelValues[1][0] == wheel.gameMain.wheelValues[2][0]) ||
-                (wheel.gameMain.wheelValues[0][1] == wheel.gameMain.wheelValues[1][1] && wheel.gameMain.wheelValues[1][1] == wheel.gameMain.wheelValues[2][1]) ||
-                (wheel.gameMain.wheelValues[0][2] == wheel.gameMain.wheelValues[1][2] && wheel.gameMain.wheelValues[1][2] == wheel.gameMain.wheelValues[2][2]) ||
-                (wheel.gameMain.wheelValues[0][2] == wheel.gameMain.wheelValues[1][1] && wheel.gameMain.wheelValues[1][1] == wheel.gameMain.wheelValues[2][0]) ||
-                (wheel.gameMain.wheelValues[0][0] == wheel.gameMain.wheelValues[1][1] && wheel.gameMain.wheelValues[1][1] == wheel.gameMain.wheelValues[2][2])
+            if ((this.wheelValues[0][0] == this.wheelValues[1][0] && this.wheelValues[1][0] == this.wheelValues[2][0]) ||
+                (this.wheelValues[0][1] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][1]) ||
+                (this.wheelValues[0][2] == this.wheelValues[1][2] && this.wheelValues[1][2] == this.wheelValues[2][2]) ||
+                (this.wheelValues[0][2] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][0]) ||
+                (this.wheelValues[0][0] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][2])
             ) {
                 //win here
-                var a = 0;
+                let a = 0;
                 a = 1;
             }
         }
@@ -153,24 +151,21 @@
         let h = new BABYLON.HemisphericLight("HemisphericLight", new BABYLON.Vector3(0, 50, 0), this.scene);
         h.intensity = 0.8;
 
-        window.addEventListener("resize", function () {
-            _self.engine.resize();
+        window.addEventListener("resize", () => {
+            this.engine.resize();
         });
 
-        let _self = this;
-        var loader = new BABYLON.AssetsManager(this.scene);
-        var loadWheelTask = loader.addMeshTask("wheel", "", "./assets/wheel/", "wheel.babylon");
-        loadWheelTask.onSuccess = function (task) {
-            _self.initMesh(task);
+        let loader = new BABYLON.AssetsManager(this.scene);
+        let loadWheelTask = loader.addMeshTask("wheel", "", "./assets/wheel/", "wheel.babylon");
+        loadWheelTask.onSuccess = (task) => {
+            this.initMesh(task);
         }
-        //loadWheelTask.onError = function (task, message, exception) {
-        //    _self.initMesh(task);
-        //}
+
         loader.load();
-        loader.onFinish = function (tasks) {
-            _self.initGame();
-            _self.engine.runRenderLoop(function () {
-                _self.scene.render();
+        loader.onFinish = (tasks) => {
+            this.initGame();
+            this.engine.runRenderLoop(() => {
+                this.scene.render();
             });
         };
     }

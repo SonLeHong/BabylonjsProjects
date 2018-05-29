@@ -1,4 +1,4 @@
-var GameMain = (function () {
+var GameMain = /** @class */ (function () {
     function GameMain(canvasName) {
         this.assets = [];
         this.wheels = new Array(WheelNumber);
@@ -21,6 +21,7 @@ var GameMain = (function () {
         return parent;
     };
     GameMain.prototype.initGame = function () {
+        var _this = this;
         var ground = BABYLON.Mesh.CreateGround("ground1", 50, 50, 2, this.scene);
         ground.position.y = -6;
         //init wheels
@@ -53,7 +54,6 @@ var GameMain = (function () {
         spinButton.material = redMat;
         dynamicTexture.drawText("Spin", 20, 16, font, "green", "white", true, true);
         spinButton.setPivotPoint(new BABYLON.Vector3(0, -1, 0));
-        var _self = this;
         if (spinButton.actionManager == null) {
             spinButton.actionManager = new BABYLON.ActionManager(this.scene);
             spinButton.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton.material, "emissiveColor", BABYLON.Color3.Red()));
@@ -62,7 +62,7 @@ var GameMain = (function () {
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, function (event) {
-                _self.spin();
+                _this.spin();
             }));
         }
         //init GUI
@@ -97,7 +97,6 @@ var GameMain = (function () {
             }
         }
         for (i = 0; i < WheelNumber; i++) {
-            //this.wheels[i].rotate(1);
             setTimeout(function (i, rotateSteps) { return _this.wheels[i].rotate(rotateSteps[i]); }, 500 * i, i, rotateSteps);
         }
     };
@@ -105,17 +104,17 @@ var GameMain = (function () {
         var i = 0;
         console.log(wheel.id + ": " + wheel.wheelValue);
         for (i = 0; i < 3; i++) {
-            wheel.gameMain.wheelValues[wheel.id][i] = (wheel.wheelValue + i) % E_WHEEL_VALUE.MAX;
+            this.wheelValues[wheel.id][i] = (wheel.wheelValue + i) % E_WHEEL_VALUE.MAX;
         }
-        wheel.gameMain.wheelStates[wheel.id] = E_WHEEL_STATE.CALLBACK_DONE;
-        if (wheel.gameMain.wheelStates[0] == E_WHEEL_STATE.CALLBACK_DONE &&
-            wheel.gameMain.wheelStates[1] == E_WHEEL_STATE.CALLBACK_DONE &&
-            wheel.gameMain.wheelStates[2] == E_WHEEL_STATE.CALLBACK_DONE) {
-            if ((wheel.gameMain.wheelValues[0][0] == wheel.gameMain.wheelValues[1][0] && wheel.gameMain.wheelValues[1][0] == wheel.gameMain.wheelValues[2][0]) ||
-                (wheel.gameMain.wheelValues[0][1] == wheel.gameMain.wheelValues[1][1] && wheel.gameMain.wheelValues[1][1] == wheel.gameMain.wheelValues[2][1]) ||
-                (wheel.gameMain.wheelValues[0][2] == wheel.gameMain.wheelValues[1][2] && wheel.gameMain.wheelValues[1][2] == wheel.gameMain.wheelValues[2][2]) ||
-                (wheel.gameMain.wheelValues[0][2] == wheel.gameMain.wheelValues[1][1] && wheel.gameMain.wheelValues[1][1] == wheel.gameMain.wheelValues[2][0]) ||
-                (wheel.gameMain.wheelValues[0][0] == wheel.gameMain.wheelValues[1][1] && wheel.gameMain.wheelValues[1][1] == wheel.gameMain.wheelValues[2][2])) {
+        this.wheelStates[wheel.id] = E_WHEEL_STATE.CALLBACK_DONE;
+        if (this.wheelStates[0] == E_WHEEL_STATE.CALLBACK_DONE &&
+            this.wheelStates[1] == E_WHEEL_STATE.CALLBACK_DONE &&
+            this.wheelStates[2] == E_WHEEL_STATE.CALLBACK_DONE) {
+            if ((this.wheelValues[0][0] == this.wheelValues[1][0] && this.wheelValues[1][0] == this.wheelValues[2][0]) ||
+                (this.wheelValues[0][1] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][1]) ||
+                (this.wheelValues[0][2] == this.wheelValues[1][2] && this.wheelValues[1][2] == this.wheelValues[2][2]) ||
+                (this.wheelValues[0][2] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][0]) ||
+                (this.wheelValues[0][0] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][2])) {
                 //win here
                 var a = 0;
                 a = 1;
@@ -123,6 +122,7 @@ var GameMain = (function () {
         }
     };
     GameMain.prototype.run = function () {
+        var _this = this;
         this.canvas = document.getElementById(this.canvasName);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.scene = new BABYLON.Scene(this.engine);
@@ -133,22 +133,21 @@ var GameMain = (function () {
         var h = new BABYLON.HemisphericLight("HemisphericLight", new BABYLON.Vector3(0, 50, 0), this.scene);
         h.intensity = 0.8;
         window.addEventListener("resize", function () {
-            _self.engine.resize();
+            _this.engine.resize();
         });
-        var _self = this;
         var loader = new BABYLON.AssetsManager(this.scene);
         var loadWheelTask = loader.addMeshTask("wheel", "", "./assets/wheel/", "wheel.babylon");
         loadWheelTask.onSuccess = function (task) {
-            _self.initMesh(task);
+            _this.initMesh(task);
         };
         //loadWheelTask.onError = function (task, message, exception) {
         //    _self.initMesh(task);
         //}
         loader.load();
         loader.onFinish = function (tasks) {
-            _self.initGame();
-            _self.engine.runRenderLoop(function () {
-                _self.scene.render();
+            _this.initGame();
+            _this.engine.runRenderLoop(function () {
+                _this.scene.render();
             });
         };
     };

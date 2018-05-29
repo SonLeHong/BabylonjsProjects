@@ -1,4 +1,4 @@
-var Wheel = (function () {
+var Wheel = /** @class */ (function () {
     function Wheel(id, gameMain) {
         this.id = id;
         this.gameMain = gameMain;
