@@ -30,7 +30,19 @@
     }
 
     initGame(): void {
-        let ground = BABYLON.Mesh.CreateGround("ground1", 50, 50, 2, this.scene);
+
+        //skybox
+        let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, this.scene);
+        let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
+        skyboxMaterial.backFaceCulling = false;
+        skyboxMaterial.reflectionTexture = new BABYLON.CubeTexture("assets/skybox/skybox", this.scene);
+        skyboxMaterial.reflectionTexture.coordinatesMode = BABYLON.Texture.SKYBOX_MODE;
+        skyboxMaterial.diffuseColor = new BABYLON.Color3(0, 0, 0);
+        skyboxMaterial.specularColor = new BABYLON.Color3(0, 0, 0);
+        skybox.material = skyboxMaterial;
+        //end skybox
+
+        let ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 2, this.scene);
         ground.position.y = -6;
         //init wheels
         for (let i = 0; i < WheelNumber; i++) {

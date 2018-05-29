@@ -56,6 +56,13 @@
     <TypeScriptSourceRoot />
   </PropertyGroup>
   <ItemGroup>
+    <Content Include="assets\ground\grass.jpg" />
+    <Content Include="assets\skybox\skybox_nx.jpg" />
+    <Content Include="assets\skybox\skybox_ny.jpg" />
+    <Content Include="assets\skybox\skybox_nz.jpg" />
+    <Content Include="assets\skybox\skybox_px.jpg" />
+    <Content Include="assets\skybox\skybox_py.jpg" />
+    <Content Include="assets\skybox\skybox_pz.jpg" />
     <Content Include="assets\wheel\wheel.png" />
     <Content Include="assets\wheel\wheel.babylon" />
     <Content Include="assets\wheel\wheel.babylon.manifest" />
