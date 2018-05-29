@@ -6,6 +6,8 @@ var Wheel = /** @class */ (function () {
         this.subdivisions = E_WHEEL_VALUE.MAX;
         this.stepToRotateThroungItem = 4; //we need to rotate x step (x update loops) to pass 1 item
         this.wheelValue = 0;
+        this.currentState = E_WHEEL_STATE.IDLE;
+        this.wheelValues = [-1, -1, -1];
         //Wheel Material 
         this.scene = gameMain.scene;
         this.model = gameMain.createMesh(gameMain.assets['wheel'], 'wheel');
@@ -16,10 +18,13 @@ var Wheel = /** @class */ (function () {
         this.rotateDoneCallback = gameMain.wheelRotateDoneCallback.bind(gameMain);
     }
     Wheel.prototype.rotate = function (rotateSteps) {
-        this.gameMain.wheelStates[this.id] = E_WHEEL_STATE.ROTATE;
+        this.currentState = E_WHEEL_STATE.ROTATE;
         console.log("rotateStep[" + this.id + "] = " + rotateSteps);
         this.currentRotateSteps = rotateSteps * this.stepToRotateThroungItem;
         this.wheelValue = (this.wheelValue + rotateSteps) % this.subdivisions;
+        for (var i = 0; i < 3; i++) {
+            this.wheelValues[i] = (this.wheelValue + i) % E_WHEEL_VALUE.MAX;
+        }
         this.scene.registerBeforeRender(this.updateMethod);
     };
     Wheel.prototype.update = function () {

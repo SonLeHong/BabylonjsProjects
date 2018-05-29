@@ -7,6 +7,8 @@
     rotateDoneCallback: BABYLON.Nullable<(wheel: Wheel) => void>;
     stepToRotateThroungItem: number = 4; //we need to rotate x step (x update loops) to pass 1 item
     wheelValue: E_WHEEL_VALUE = 0;
+    currentState: E_WHEEL_STATE = E_WHEEL_STATE.IDLE;
+    wheelValues: number[] = [-1, -1, -1];
     constructor(public id: number, public gameMain: GameMain) {
         //Wheel Material 
         this.scene = gameMain.scene;
@@ -19,17 +21,20 @@
     }
 
     public rotate(rotateSteps: number): void {
-        this.gameMain.wheelStates[this.id] = E_WHEEL_STATE.ROTATE;
+        this.currentState = E_WHEEL_STATE.ROTATE;
         console.log("rotateStep[" + this.id + "] = " + rotateSteps);
         this.currentRotateSteps = rotateSteps * this.stepToRotateThroungItem;
         this.wheelValue = (this.wheelValue + rotateSteps) % this.subdivisions;
+        for (let i = 0; i < 3; i++) {
+            this.wheelValues[i] = (this.wheelValue + i) % E_WHEEL_VALUE.MAX;
+        }
         this.scene.registerBeforeRender(this.updateMethod);
     }
 
     public update(): void {
         if (this.currentRotateSteps <= 0) {
             this.scene.unregisterBeforeRender(this.updateMethod);
-            this.rotateDoneCallback(this);
+            this.rotateDoneCallback(this);           
             return;
         }
 

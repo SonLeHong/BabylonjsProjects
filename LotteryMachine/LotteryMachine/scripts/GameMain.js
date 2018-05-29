@@ -2,8 +2,6 @@ var GameMain = /** @class */ (function () {
     function GameMain(canvasName) {
         this.assets = [];
         this.wheels = new Array(WheelNumber);
-        this.wheelValues = [[-1, -1, -1], [-1, -1, -1], [-1, -1, -1]];
-        this.wheelStates = [E_WHEEL_STATE.IDLE, E_WHEEL_STATE.IDLE, E_WHEEL_STATE.IDLE];
         this.spinRemaining = 50;
         this.spinWining = 0;
         this.canvasName = canvasName;
@@ -64,11 +62,14 @@ var GameMain = /** @class */ (function () {
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, function (event) {
-                if (_this.spinRemaining > 0) {
-                    _this.spin();
-                    _this.spinRemaining -= 1;
-                }
-                else {
+                if (_this.wheels[0].currentState == E_WHEEL_STATE.IDLE && _this.wheels[1].currentState == E_WHEEL_STATE.IDLE && _this.wheels[2].currentState == E_WHEEL_STATE.IDLE) {
+                    if (_this.spinRemaining > 0) {
+                        _this.spin();
+                        _this.spinRemaining -= 1;
+                    }
+                    else {
+                        //message here
+                    }
                 }
             }));
         }
@@ -120,24 +121,19 @@ var GameMain = /** @class */ (function () {
         }
     };
     GameMain.prototype.wheelRotateDoneCallback = function (wheel) {
-        var i = 0;
-        console.log(wheel.id + ": " + wheel.wheelValue);
-        for (i = 0; i < 3; i++) {
-            this.wheelValues[wheel.id][i] = (wheel.wheelValue + i) % E_WHEEL_VALUE.MAX;
-        }
-        this.wheelStates[wheel.id] = E_WHEEL_STATE.CALLBACK_DONE;
-        if (this.wheelStates[0] == E_WHEEL_STATE.CALLBACK_DONE &&
-            this.wheelStates[1] == E_WHEEL_STATE.CALLBACK_DONE &&
-            this.wheelStates[2] == E_WHEEL_STATE.CALLBACK_DONE) {
-            if ((this.wheelValues[0][0] == this.wheelValues[1][0] && this.wheelValues[1][0] == this.wheelValues[2][0]) ||
-                (this.wheelValues[0][1] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][1]) ||
-                (this.wheelValues[0][2] == this.wheelValues[1][2] && this.wheelValues[1][2] == this.wheelValues[2][2]) ||
-                (this.wheelValues[0][2] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][0]) ||
-                (this.wheelValues[0][0] == this.wheelValues[1][1] && this.wheelValues[1][1] == this.wheelValues[2][2])) {
+        wheel.currentState = E_WHEEL_STATE.CALLBACK_DONE;
+        if (this.wheels[0].currentState == E_WHEEL_STATE.CALLBACK_DONE &&
+            this.wheels[1].currentState == E_WHEEL_STATE.CALLBACK_DONE &&
+            this.wheels[2].currentState == E_WHEEL_STATE.CALLBACK_DONE) {
+            if ((this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[0] && this.wheels[1].wheelValues[0] == this.wheels[2].wheelValues[0]) ||
+                (this.wheels[0].wheelValues[1] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[1]) ||
+                (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[2] && this.wheels[1].wheelValues[2] == this.wheels[2].wheelValues[2]) ||
+                (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[0]) ||
+                (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[2])) {
                 //win here
-                var a = 0;
-                a = 1;
+                this.spinWining += 1;
             }
+            this.wheels[0].currentState = this.wheels[1].currentState = this.wheels[2].currentState = E_WHEEL_STATE.IDLE;
         }
     };
     GameMain.prototype.run = function () {
