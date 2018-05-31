@@ -153,7 +153,7 @@ var GameMain = /** @class */ (function () {
         this.canvas = document.getElementById(this.canvasName);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.scene = new BABYLON.Scene(this.engine);
-        this.scene.enablePhysics(new BABYLON.Vector3(0, -9.81, 0));
+        this.scene.enablePhysics();
         var camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(-5, 5, -35), this.scene);
         camera.setTarget(new BABYLON.Vector3(3, 3, 0));
         camera.attachControl(this.engine.getRenderingCanvas());

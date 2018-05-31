@@ -48,7 +48,7 @@
         ground.position.y = -6;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.4 }, this.scene);
 
-        let box = new BoxBonus(100, this.scene);
+        let box = new BoxBonus(100, new BABYLON.Vector3(15, 30, 0), this.scene);
         //init wheels
         for (let i = 0; i < WheelNumber; i++) {
             this.wheels[i] = new Wheel(i, this);
@@ -175,6 +175,7 @@
         this.canvas = document.getElementById(this.canvasName);
         this.engine = new BABYLON.Engine(this.canvas, true);
         this.scene = new BABYLON.Scene(this.engine);
+        this.scene.enablePhysics();
 
         let camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(-5, 5, -35), this.scene);
         camera.setTarget(new BABYLON.Vector3(3, 3, 0));
