@@ -10,6 +10,7 @@
     textBlock: BABYLON.GUI.TextBlock;
     backgroundMusic: BABYLON.Sound;
     spinSound: BABYLON.Sound;
+    currentGameState: E_GAME_STATE;
     constructor(canvasName: string) {
         this.canvasName = canvasName;
     }
@@ -32,7 +33,6 @@
     }
 
     initGame(): void {
-
         //skybox
         let skybox = BABYLON.MeshBuilder.CreateBox("skyBox", { size: 1000.0 }, this.scene);
         let skyboxMaterial = new BABYLON.StandardMaterial("skyBox", this.scene);
@@ -47,15 +47,13 @@
         let ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 2, this.scene);
         ground.position.y = -6;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.4 }, this.scene);
-
-        let box = new BoxBonus(100, new BABYLON.Vector3(15, 30, 0), this.scene);
+       
         //init wheels
         for (let i = 0; i < WheelNumber; i++) {
             this.wheels[i] = new Wheel(i, this);
             this.wheels[i].model.position.x = 3 * i;
         }
         //init lines
-        BABYLON.MeshBuilder.CreateCylinder
         let cl = BABYLON.MeshBuilder.CreateCylinder("cl", { height: 10, diameter: 12, arc: 0.7, enclose: true, subdivisions: 3, hasRings: true }, this.scene);
         cl.rotate(BABYLON.Axis.Z, Math.PI / 2, BABYLON.Space.WORLD);
         cl.rotate(BABYLON.Axis.X, - Math.PI * 3 / 4, BABYLON.Space.WORLD);
@@ -88,15 +86,7 @@
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (event) => {
-                if (this.wheels[0].currentState == E_WHEEL_STATE.IDLE && this.wheels[1].currentState == E_WHEEL_STATE.IDLE && this.wheels[2].currentState == E_WHEEL_STATE.IDLE) {
-                    if (this.spinRemaining > 0) {
-                        this.spin();
-                        this.spinRemaining -= 1;
-                    }
-                    else {
-                        //message here
-                    }
-                }
+                this.currentGameState = E_GAME_STATE.SPIN;
             }));
         }
 
@@ -123,10 +113,48 @@
         this.textBlock.fontSize = 24;
         rect1.addControl(this.textBlock);
 
-        this.scene.registerBeforeRender(() => {
-            this.updateGUI();
-        });
-
+        this.currentGameState = E_GAME_STATE.IDLE;
+        //this.scene.registerBeforeRender(() => {
+        //    this.updateGUI();
+        //});
+    }
+    update(): void{
+        switch (this.currentGameState) {
+            case E_GAME_STATE.INIT:
+                this.initGame();
+                break;
+            case E_GAME_STATE.IDLE:
+                break;
+            case E_GAME_STATE.SPIN:
+                if (this.wheels[0].currentState == E_WHEEL_STATE.IDLE && this.wheels[1].currentState == E_WHEEL_STATE.IDLE && this.wheels[2].currentState == E_WHEEL_STATE.IDLE) {
+                    if (this.spinRemaining > 0) {
+                        this.spin();
+                        this.spinRemaining -= 1;
+                    }
+                    else {
+                        //message here
+                    }
+                }
+                this.currentGameState = E_GAME_STATE.UPDATE_WHEEL;
+                break;
+            case E_GAME_STATE.UPDATE_WHEEL:
+                for (let i = 0; i < WheelNumber; i++) {
+                    if (this.wheels[i].currentState == E_WHEEL_STATE.ROTATE) {
+                        this.wheels[i].update();
+                    }
+                }
+                break;
+            case E_GAME_STATE.PICK_BONUS:
+                for (let i = 0; i < 3; i++) {
+                    let goldBonus = Math.floor(Math.random() * 5) + 5;
+                    let box = new BoxBonus(goldBonus * 100, new BABYLON.Vector3((i - 1)* 15, 30, -20), this.scene);
+                }
+                this.currentGameState = E_GAME_STATE.IDLE;
+                break;
+            default:
+                break;
+        }
+        this.updateGUI();
     }
     updateGUI(): void {
         this.textBlock.text = "";
@@ -137,15 +165,17 @@
 
     spin(): void {
         let i = 0;
-        let rotateSteps: number[] = new Array(WheelNumber);
-        for (i = 0; i < WheelNumber; i++) {
-            if (i == 0) {
-                rotateSteps[i] = Math.floor(Math.random() * 20) + 10;
-            }
-            else {
-                rotateSteps[i] = rotateSteps[i - 1] + Math.floor(Math.random() * 10);
-            }
-        }
+        let rotateSteps: number[] = [1, 1, 1];
+        //let rotateSteps: number[] = new Array(WheelNumber);
+        //for (i = 0; i < WheelNumber; i++) {
+        //    if (i == 0) {
+        //        rotateSteps[i] = Math.floor(Math.random() * 20) + 10;
+        //    }
+        //    else {
+        //        rotateSteps[i] = rotateSteps[i - 1] + Math.floor(Math.random() * 10);
+        //    }
+        //}
+
         for (i = 0; i < WheelNumber; i++) {
             setTimeout((i, rotateSteps) => this.wheels[i].rotate(rotateSteps[i]), 500 * i, i, rotateSteps);
         }
@@ -157,16 +187,40 @@
             this.wheels[1].currentState == E_WHEEL_STATE.CALLBACK_DONE &&
             this.wheels[2].currentState == E_WHEEL_STATE.CALLBACK_DONE
         ) {
-            if ((this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[0] && this.wheels[1].wheelValues[0] == this.wheels[2].wheelValues[0]) ||
-                (this.wheels[0].wheelValues[1] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[1]) ||
-                (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[2] && this.wheels[1].wheelValues[2] == this.wheels[2].wheelValues[2]) ||
-                (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[0]) ||
-                (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[2])
-            ) {
-                //win here
-                this.spinWining += 1;
+            let wheelValuesWin: E_WHEEL_VALUE[] = new Array();
+            let win: boolean = false;
+
+            if (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[0] && this.wheels[1].wheelValues[0] == this.wheels[2].wheelValues[0]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[0]);
+                win = true;
             }
+            if (this.wheels[0].wheelValues[1] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[1]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[1]);
+                win = true;
+            }
+            if (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[2] && this.wheels[1].wheelValues[2] == this.wheels[2].wheelValues[2]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[2]);
+                win = true;
+            }
+            if (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[0]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[2]);
+                win = true;
+            }
+            if (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[2]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[0]);
+                win = true;
+            }
+            this.currentGameState = E_GAME_STATE.IDLE;
             this.wheels[0].currentState = this.wheels[1].currentState = this.wheels[2].currentState = E_WHEEL_STATE.IDLE;
+            if (win) {
+                if (wheelValuesWin.indexOf(E_WHEEL_VALUE.BAR)) {
+                    
+                }
+                else if (wheelValuesWin.indexOf(E_WHEEL_VALUE.SEVEN_NUMBER)) {
+                    this.currentGameState = E_GAME_STATE.PICK_BONUS;
+                }
+            }
+                       
         }
     }
 
@@ -207,9 +261,13 @@
 
         loader.load();
         loader.onFinish = (tasks) => {
-            this.initGame();
+            this.currentGameState = E_GAME_STATE.INIT;
+
             this.engine.runRenderLoop(() => {
                 this.scene.render();
+            });
+            this.scene.registerBeforeRender(() => {
+                this.update();
             });
         };
     }

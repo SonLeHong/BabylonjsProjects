@@ -35,14 +35,12 @@ var GameMain = /** @class */ (function () {
         var ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 2, this.scene);
         ground.position.y = -6;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.4 }, this.scene);
-        var box = new BoxBonus(100, this.scene);
         //init wheels
         for (var i = 0; i < WheelNumber; i++) {
             this.wheels[i] = new Wheel(i, this);
             this.wheels[i].model.position.x = 3 * i;
         }
         //init lines
-        BABYLON.MeshBuilder.CreateCylinder;
         var cl = BABYLON.MeshBuilder.CreateCylinder("cl", { height: 10, diameter: 12, arc: 0.7, enclose: true, subdivisions: 3, hasRings: true }, this.scene);
         cl.rotate(BABYLON.Axis.Z, Math.PI / 2, BABYLON.Space.WORLD);
         cl.rotate(BABYLON.Axis.X, -Math.PI * 3 / 4, BABYLON.Space.WORLD);
@@ -74,15 +72,7 @@ var GameMain = /** @class */ (function () {
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, function (event) {
-                if (_this.wheels[0].currentState == E_WHEEL_STATE.IDLE && _this.wheels[1].currentState == E_WHEEL_STATE.IDLE && _this.wheels[2].currentState == E_WHEEL_STATE.IDLE) {
-                    if (_this.spinRemaining > 0) {
-                        _this.spin();
-                        _this.spinRemaining -= 1;
-                    }
-                    else {
-                        //message here
-                    }
-                }
+                _this.currentGameState = E_GAME_STATE.SPIN;
             }));
         }
         //init GUI
@@ -106,9 +96,48 @@ var GameMain = /** @class */ (function () {
         this.textBlock.width = "300px";
         this.textBlock.fontSize = 24;
         rect1.addControl(this.textBlock);
-        this.scene.registerBeforeRender(function () {
-            _this.updateGUI();
-        });
+        this.currentGameState = E_GAME_STATE.IDLE;
+        //this.scene.registerBeforeRender(() => {
+        //    this.updateGUI();
+        //});
+    };
+    GameMain.prototype.update = function () {
+        switch (this.currentGameState) {
+            case E_GAME_STATE.INIT:
+                this.initGame();
+                break;
+            case E_GAME_STATE.IDLE:
+                break;
+            case E_GAME_STATE.SPIN:
+                if (this.wheels[0].currentState == E_WHEEL_STATE.IDLE && this.wheels[1].currentState == E_WHEEL_STATE.IDLE && this.wheels[2].currentState == E_WHEEL_STATE.IDLE) {
+                    if (this.spinRemaining > 0) {
+                        this.spin();
+                        this.spinRemaining -= 1;
+                    }
+                    else {
+                        //message here
+                    }
+                }
+                this.currentGameState = E_GAME_STATE.UPDATE_WHEEL;
+                break;
+            case E_GAME_STATE.UPDATE_WHEEL:
+                for (var i = 0; i < WheelNumber; i++) {
+                    if (this.wheels[i].currentState == E_WHEEL_STATE.ROTATE) {
+                        this.wheels[i].update();
+                    }
+                }
+                break;
+            case E_GAME_STATE.PICK_BONUS:
+                for (var i = 0; i < 3; i++) {
+                    var goldBonus = Math.floor(Math.random() * 5) + 5;
+                    var box = new BoxBonus(goldBonus * 100, new BABYLON.Vector3((i - 1) * 15, 30, -20), this.scene);
+                }
+                this.currentGameState = E_GAME_STATE.IDLE;
+                break;
+            default:
+                break;
+        }
+        this.updateGUI();
     };
     GameMain.prototype.updateGUI = function () {
         this.textBlock.text = "";
@@ -119,15 +148,16 @@ var GameMain = /** @class */ (function () {
     GameMain.prototype.spin = function () {
         var _this = this;
         var i = 0;
-        var rotateSteps = new Array(WheelNumber);
-        for (i = 0; i < WheelNumber; i++) {
-            if (i == 0) {
-                rotateSteps[i] = Math.floor(Math.random() * 20) + 10;
-            }
-            else {
-                rotateSteps[i] = rotateSteps[i - 1] + Math.floor(Math.random() * 10);
-            }
-        }
+        var rotateSteps = [1, 1, 1];
+        //let rotateSteps: number[] = new Array(WheelNumber);
+        //for (i = 0; i < WheelNumber; i++) {
+        //    if (i == 0) {
+        //        rotateSteps[i] = Math.floor(Math.random() * 20) + 10;
+        //    }
+        //    else {
+        //        rotateSteps[i] = rotateSteps[i - 1] + Math.floor(Math.random() * 10);
+        //    }
+        //}
         for (i = 0; i < WheelNumber; i++) {
             setTimeout(function (i, rotateSteps) { return _this.wheels[i].rotate(rotateSteps[i]); }, 500 * i, i, rotateSteps);
         }
@@ -137,15 +167,37 @@ var GameMain = /** @class */ (function () {
         if (this.wheels[0].currentState == E_WHEEL_STATE.CALLBACK_DONE &&
             this.wheels[1].currentState == E_WHEEL_STATE.CALLBACK_DONE &&
             this.wheels[2].currentState == E_WHEEL_STATE.CALLBACK_DONE) {
-            if ((this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[0] && this.wheels[1].wheelValues[0] == this.wheels[2].wheelValues[0]) ||
-                (this.wheels[0].wheelValues[1] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[1]) ||
-                (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[2] && this.wheels[1].wheelValues[2] == this.wheels[2].wheelValues[2]) ||
-                (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[0]) ||
-                (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[2])) {
-                //win here
-                this.spinWining += 1;
+            var wheelValuesWin = new Array();
+            var win = false;
+            if (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[0] && this.wheels[1].wheelValues[0] == this.wheels[2].wheelValues[0]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[0]);
+                win = true;
             }
+            if (this.wheels[0].wheelValues[1] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[1]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[1]);
+                win = true;
+            }
+            if (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[2] && this.wheels[1].wheelValues[2] == this.wheels[2].wheelValues[2]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[2]);
+                win = true;
+            }
+            if (this.wheels[0].wheelValues[2] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[0]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[2]);
+                win = true;
+            }
+            if (this.wheels[0].wheelValues[0] == this.wheels[1].wheelValues[1] && this.wheels[1].wheelValues[1] == this.wheels[2].wheelValues[2]) {
+                wheelValuesWin.push(this.wheels[0].wheelValues[0]);
+                win = true;
+            }
+            this.currentGameState = E_GAME_STATE.IDLE;
             this.wheels[0].currentState = this.wheels[1].currentState = this.wheels[2].currentState = E_WHEEL_STATE.IDLE;
+            if (win) {
+                if (wheelValuesWin.indexOf(E_WHEEL_VALUE.BAR)) {
+                }
+                else if (wheelValuesWin.indexOf(E_WHEEL_VALUE.SEVEN_NUMBER)) {
+                    this.currentGameState = E_GAME_STATE.PICK_BONUS;
+                }
+            }
         }
     };
     GameMain.prototype.run = function () {
@@ -178,9 +230,12 @@ var GameMain = /** @class */ (function () {
         };
         loader.load();
         loader.onFinish = function (tasks) {
-            _this.initGame();
+            _this.currentGameState = E_GAME_STATE.INIT;
             _this.engine.runRenderLoop(function () {
                 _this.scene.render();
+            });
+            _this.scene.registerBeforeRender(function () {
+                _this.update();
             });
         };
     };

@@ -25,11 +25,12 @@ var Wheel = /** @class */ (function () {
         for (var i = 0; i < 3; i++) {
             this.wheelValues[i] = (this.wheelValue + i) % E_WHEEL_VALUE.MAX;
         }
-        this.scene.registerBeforeRender(this.updateMethod);
+        //this.scene.registerBeforeRender(this.updateMethod);
     };
     Wheel.prototype.update = function () {
         if (this.currentRotateSteps <= 0) {
-            this.scene.unregisterBeforeRender(this.updateMethod);
+            //this.scene.unregisterBeforeRender(this.updateMethod);
+            this.currentState = E_WHEEL_STATE.STOP;
             this.rotateDoneCallback(this);
             return;
         }
