@@ -298,7 +298,7 @@ var GameMain = (function () {
         this.scene.enablePhysics();
         var camera = new BABYLON.FreeCamera("FreeCamera", new BABYLON.Vector3(-5, 5, -35), this.scene);
         camera.setTarget(new BABYLON.Vector3(3, 3, 0));
-        camera.attachControl(this.engine.getRenderingCanvas());
+        //camera.attachControl(this.engine.getRenderingCanvas());
         // Hemispheric light to light the scene
         var h = new BABYLON.HemisphericLight("HemisphericLight", new BABYLON.Vector3(0, 50, 0), this.scene);
         h.intensity = 0.8;
