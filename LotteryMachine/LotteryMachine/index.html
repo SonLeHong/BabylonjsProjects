@@ -38,12 +38,35 @@
     </style>
 </head>
 <body>
-    <canvas id="canvas"></canvas>
-    <!--<script language="javascript">
+    <canvas id="canvas" style="z-index:1"></canvas>
+    <input type="button" style="z-index:2; position:absolute; top:10px; right:10px;" value="Show Rules" onclick="return RulesButtonOnClick();" id="rulesButton"/>
+    <!--<div style="z-index:3; align-content:center">-->
+        <img src="assets/Rules.png" style="z-index:3; position:absolute; top:50px;left:10px; display:none" id="rulesImg" >
+    <!--</div>-->
+    
+    <script language="javascript">
         window.addEventListener('DOMContentLoaded', function () {
-            new GameMain("canvas");
+            var image = document.getElementById('rulesImg');
+            var left = (window.innerWidth / 2 - 175).toString() + "px";
+            image.style.left = left;
+            
         });
-    </script>-->
+
+        function RulesButtonOnClick()
+        {
+            var image = document.getElementById('rulesImg');
+            var btn = document.getElementById('rulesButton');
+            if (btn.value == "Show Rules") {
+                btn.value = "Hide Rules";
+                image.style.display = "block";               
+            }
+            else
+            {
+                btn.value = "Show Rules";
+                image.style.display = "none";          
+            }
+        }
+    </script>
 
 </body>
 </html>

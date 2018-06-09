@@ -7,10 +7,15 @@
     wheels: Wheel[] = new Array(WheelNumber);
     spinRemaining: number = 50;
     spinWining: number = 0;
+    goldWining: number = 0;
     textBlock: BABYLON.GUI.TextBlock;
+    textNotification: BABYLON.GUI.TextBlock;
     backgroundMusic: BABYLON.Sound;
     spinSound: BABYLON.Sound;
     currentGameState: E_GAME_STATE;
+    bonusBoxs: BoxBonus[] = new Array(3);
+    cheat: boolean = false;
+    showNotifyTimeoutId: number;
     constructor(canvasName: string) {
         this.canvasName = canvasName;
     }
@@ -47,7 +52,7 @@
         let ground = BABYLON.Mesh.CreateGround("ground1", 100, 100, 2, this.scene);
         ground.position.y = -6;
         ground.physicsImpostor = new BABYLON.PhysicsImpostor(ground, BABYLON.PhysicsImpostor.BoxImpostor, { mass: 0, restitution: 0.4 }, this.scene);
-       
+
         //init wheels
         for (let i = 0; i < WheelNumber; i++) {
             this.wheels[i] = new Wheel(i, this);
@@ -86,6 +91,38 @@
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, spinButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
             spinButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (event) => {
+                if (this.currentGameState == E_GAME_STATE.WAIT_PICK_BONUS) {
+                    return;
+                }
+                this.currentGameState = E_GAME_STATE.SPIN;
+            }));
+        }
+
+        //cheatButton
+        let cheatButton = BABYLON.MeshBuilder.CreateBox("cheatButton", { size: 2, width: 4, height: 2 }, this.scene);
+        cheatButton.position = new BABYLON.Vector3(10, -5, -6);
+        let redMatCheatButton = new BABYLON.StandardMaterial("ground", this.scene);
+        let dynamicTextureCheatButton = new BABYLON.DynamicTexture("dynamic texture", { width: 64, height: 32 }, this.scene, false);
+
+        redMatCheatButton.diffuseColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+        redMatCheatButton.specularColor = new BABYLON.Color3(0.4, 0.4, 0.4);
+        redMatCheatButton.emissiveColor = BABYLON.Color3.Red();
+        redMatCheatButton.diffuseTexture = dynamicTextureCheatButton;
+        cheatButton.material = redMatCheatButton;
+        dynamicTextureCheatButton.drawText("Cheat", 20, 16, font, "green", "white", true, true);
+        cheatButton.setPivotPoint(new BABYLON.Vector3(0, -1, 0));
+        if (cheatButton.actionManager == null) {
+            cheatButton.actionManager = new BABYLON.ActionManager(this.scene);
+            cheatButton.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOutTrigger, cheatButton.material, "emissiveColor", BABYLON.Color3.Red()));
+            cheatButton.actionManager.registerAction(new BABYLON.SetValueAction(BABYLON.ActionManager.OnPointerOverTrigger, cheatButton.material, "emissiveColor", BABYLON.Color3.Blue()));
+            cheatButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickDownTrigger, cheatButton, "scaling", new BABYLON.Vector3(1, 0.5, 1), 150));
+            cheatButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPickUpTrigger, cheatButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
+            cheatButton.actionManager.registerAction(new BABYLON.InterpolateValueAction(BABYLON.ActionManager.OnPointerOutTrigger, cheatButton, "scaling", new BABYLON.Vector3(1, 1, 1), 150));
+            cheatButton.actionManager.registerAction(new BABYLON.ExecuteCodeAction(BABYLON.ActionManager.OnPickDownTrigger, (event) => {
+                if (this.currentGameState == E_GAME_STATE.WAIT_PICK_BONUS) {
+                    return;
+                }
+                this.cheat = true;
                 this.currentGameState = E_GAME_STATE.SPIN;
             }));
         }
@@ -108,28 +145,58 @@
         this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
         this.textBlock.text += "\n";
         this.textBlock.text += "Spin Wining: " + this.spinWining;
-        this.textBlock.color = "blue";
+        this.textBlock.color = "White";
         this.textBlock.width = "300px";
         this.textBlock.fontSize = 24;
         rect1.addControl(this.textBlock);
+
+        let rect2 = new BABYLON.GUI.Rectangle();
+        rect2.horizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        rect2.verticalAlignment = BABYLON.GUI.Control.VERTICAL_ALIGNMENT_TOP;
+        rect2.adaptWidthToChildren = true;
+        rect2.height = "80px";
+        //rect1.cornerRadius = 20;
+        rect2.color = "Orange";
+        rect2.thickness = 0;
+        //rect1.background = "green";
+        advancedTexture.addControl(rect2);
+
+        this.textNotification = new BABYLON.GUI.TextBlock();
+        this.textNotification.textHorizontalAlignment = BABYLON.GUI.Control.HORIZONTAL_ALIGNMENT_CENTER;
+        this.textNotification.color = "red";
+        this.textNotification.width = "300px";
+        this.textNotification.fontSize = 36;
+        rect2.addControl(this.textNotification);
 
         this.currentGameState = E_GAME_STATE.IDLE;
         //this.scene.registerBeforeRender(() => {
         //    this.updateGUI();
         //});
     }
-    update(): void{
+
+    showNotificationMessage(text: string, textColor: string, fontSize: number, timeOut: number): void {
+        this.textNotification.text = text;
+        this.textNotification.color = textColor;
+        this.textNotification.fontSize = fontSize;
+        clearTimeout(this.showNotifyTimeoutId);
+        this.showNotifyTimeoutId = setTimeout((timeOut) => {
+            this.textNotification.text = "";
+        }, timeOut);
+    }
+
+    update(): void {
         switch (this.currentGameState) {
             case E_GAME_STATE.INIT:
                 this.initGame();
                 break;
             case E_GAME_STATE.IDLE:
                 break;
-            case E_GAME_STATE.SPIN:
+            case E_GAME_STATE.SPIN:                
                 if (this.wheels[0].currentState == E_WHEEL_STATE.IDLE && this.wheels[1].currentState == E_WHEEL_STATE.IDLE && this.wheels[2].currentState == E_WHEEL_STATE.IDLE) {
                     if (this.spinRemaining > 0) {
                         this.spin();
                         this.spinRemaining -= 1;
+                        this.showNotificationMessage("-1 spin", "red", 32, 2000);
                     }
                     else {
                         //message here
@@ -147,35 +214,59 @@
             case E_GAME_STATE.PICK_BONUS:
                 for (let i = 0; i < 3; i++) {
                     let goldBonus = Math.floor(Math.random() * 5) + 5;
-                    let box = new BoxBonus(goldBonus * 100, new BABYLON.Vector3((i - 1)* 15, 30, -20), this.scene);
+                    setTimeout((i, goldBonus) => {
+                        this.bonusBoxs[i] = new BoxBonus(goldBonus * 100, new BABYLON.Vector3(10 * i - 5, 10, -10), this.scene, this);
+                    }, 500 * (i), i, goldBonus);
                 }
-                this.currentGameState = E_GAME_STATE.IDLE;
+                this.currentGameState = E_GAME_STATE.WAIT_PICK_BONUS;
                 break;
             default:
                 break;
         }
         this.updateGUI();
     }
+
+    removeBonusBoxs(): void {
+        for (let i = 0; i < 3; i++) {
+            this.bonusBoxs[i].dispose();
+            this.bonusBoxs[i] = null;
+        }
+        this.currentGameState = E_GAME_STATE.IDLE;
+    }
+
     updateGUI(): void {
         this.textBlock.text = "";
         this.textBlock.text += "Spin Remaining: " + this.spinRemaining;
         this.textBlock.text += "\n";
-        this.textBlock.text += "Spin Wining: " + this.spinWining;
+        this.textBlock.text += "Gold Wining: " + this.goldWining;
     }
 
     spin(): void {
         let i = 0;
-        let rotateSteps: number[] = [1, 1, 1];
-        //let rotateSteps: number[] = new Array(WheelNumber);
-        //for (i = 0; i < WheelNumber; i++) {
-        //    if (i == 0) {
-        //        rotateSteps[i] = Math.floor(Math.random() * 20) + 10;
-        //    }
-        //    else {
-        //        rotateSteps[i] = rotateSteps[i - 1] + Math.floor(Math.random() * 10);
-        //    }
-        //}
-
+        //let rotateSteps: number[] = [1, 1, 1];
+        let rotateSteps: number[] = new Array(WheelNumber);
+        if (this.cheat) {
+            rotateSteps[0] = Math.floor(Math.random() * 10) + 5;
+            let value0 = (this.wheels[0].wheelValue + rotateSteps[0]) % E_WHEEL_VALUE.MAX;
+            for (let i = 1; i <= 2; i++) {
+                if (value0 >= this.wheels[i].wheelValue) {
+                    rotateSteps[i] = value0 - this.wheels[i].wheelValue;
+                }
+                else {
+                    rotateSteps[i] = E_WHEEL_VALUE.MAX - this.wheels[i].wheelValue + value0;
+                }
+            }
+        }
+        else {
+            for (i = 0; i < WheelNumber; i++) {
+                if (i == 0) {
+                    rotateSteps[i] = Math.floor(Math.random() * 10) + 5;
+                }
+                else {
+                    rotateSteps[i] = rotateSteps[i - 1] + Math.floor(Math.random() * 5);
+                }
+            }
+        }
         for (i = 0; i < WheelNumber; i++) {
             setTimeout((i, rotateSteps) => this.wheels[i].rotate(rotateSteps[i]), 500 * i, i, rotateSteps);
         }
@@ -213,14 +304,19 @@
             this.currentGameState = E_GAME_STATE.IDLE;
             this.wheels[0].currentState = this.wheels[1].currentState = this.wheels[2].currentState = E_WHEEL_STATE.IDLE;
             if (win) {
-                if (wheelValuesWin.indexOf(E_WHEEL_VALUE.BAR)) {
-                    
+                if (wheelValuesWin.indexOf(E_WHEEL_VALUE.BAR) >= 0) {
+                    this.spinRemaining += 30;
+                    this.showNotificationMessage("+30 spins", "red", 40, 5000);
                 }
-                else if (wheelValuesWin.indexOf(E_WHEEL_VALUE.SEVEN_NUMBER)) {
+                else if (wheelValuesWin.indexOf(E_WHEEL_VALUE.SEVEN_NUMBER) >= 0) {
                     this.currentGameState = E_GAME_STATE.PICK_BONUS;
                 }
+                else {
+                    this.spinRemaining += 10;
+                    this.showNotificationMessage("+10 spins", "red", 40, 5000);
+                }
             }
-                       
+
         }
     }
 
